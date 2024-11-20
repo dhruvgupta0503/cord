@@ -245,6 +245,44 @@ fn check_empty_schema_creation() {
 }
 
 
+#[test]
+fn check_invalid_identifier_handling() {
+    let creator = DID_00;
+    let author = ACCOUNT_00;
+    let capacity = 3u64;
+
+    // Generate an invalid space ID and schema ID
+    let invalid_space_id: SpaceIdOf = generate_space_id::<Test>(&H256::random());
+    let invalid_schema_id: SchemaIdOf = generate_schema_id::<Test>(&H256::random());
+
+    new_test_ext().execute_with(|| {
+        // Test 1: Attempt to approve an invalid space ID, which should fail with InvalidIdentifier
+        assert_noop!(
+            Space::approve(RawOrigin::Root.into(), invalid_space_id, capacity),
+            Error::<Test>::InvalidIdentifier
+        );
+
+        // Prepare a valid schema, but with invalid authorization ID for testing schema creation
+        let raw_schema = [2u8; 256].to_vec();
+        let schema: InputSchemaOf<Test> = BoundedVec::try_from(raw_schema)
+            .expect("Test Schema should fit into the expected input length of the test runtime.");
+        let auth_digest = <Test as frame_system::Config>::Hashing::hash(
+            &[&invalid_space_id.encode()[..], &creator.encode()[..], &creator.encode()[..]].concat()[..],
+        );
+        let invalid_authorization_id: Ss58Identifier = generate_authorization_id::<Test>(&auth_digest);
+
+        // Test 2: Attempt to create a schema with an invalid authorization ID, expecting InvalidIdentifier error
+        assert_noop!(
+            Schema::create(
+                DoubleOrigin(author.clone(), creator.clone()).into(),
+                schema.clone(),
+                invalid_authorization_id
+            ),
+            Error::<Test>::InvalidIdentifier
+        );
+    });
+}
+
 
 
 
