@@ -139,6 +139,7 @@ pub mod pallet {
 		// Invalid Schema Identifier Length.
 		InvalidIdentifierLength,
 		/// The paying account was unable to pay the fees for creating a schema.
+		InvalidIdentifier,
 		UnableToPayFees,
 		/// Creator DID information not found.
 		CreatorNotFound,
