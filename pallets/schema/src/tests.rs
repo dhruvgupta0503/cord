@@ -244,6 +244,10 @@ fn check_empty_schema_creation() {
 	});
 }
 
+
+
+
+
 // This test creates multiple schemas, stores them on the chain, and then
 // retrieves each schema based on its identifier. It verifies that the retrieved
 // schemas match the expected values.
